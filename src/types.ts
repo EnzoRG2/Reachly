@@ -16,13 +16,20 @@ export interface Destination {
   emoji: string
   img: string
   temp: string
-  px: number
-  py: number
+  lat: number
+  lng: number
   desc: string
   train: TransportOption | null
   bus: TransportOption | null
   plane: TransportOption | null
   car: TransportOption | null
+}
+
+export interface CityResult {
+  name: string
+  displayName: string
+  lat: number
+  lng: number
 }
 
 export type TransportMode = 'train' | 'bus' | 'plane' | 'car'
