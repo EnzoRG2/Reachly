@@ -1,0 +1,89 @@
+import type { Destination } from '../types'
+
+export const DEST_COLORS = [
+  '#0063DC', '#F97316', '#16A34A', '#7C3AED', '#EC4899',
+  '#0891B2', '#D97706', '#9333EA', '#059669', '#DC2626',
+]
+
+export const DESTS: Destination[] = [
+  {
+    id: 1, name: 'Barcelone', country: 'Espagne', code: 'BCN', emoji: '🇪🇸', img: '🏖️', temp: '27°C', px: 18, py: 65,
+    desc: 'Gaudí · plages · tapas · nightlife',
+    train: { time: '4h30', price: 39, op: 'SNCF Renfe',    stops: 1, co2: 0.4 },
+    bus:   { time: '8h45', price: 19, op: 'FlixBus',        stops: 0, co2: 0.8 },
+    plane: { time: '1h20', price: 55, op: 'EasyJet',        stops: 0, co2: 89  },
+    car:   { time: '6h00', price: 58, op: 'Voiture perso',  stops: 0, co2: 62  },
+  },
+  {
+    id: 2, name: 'Milan', country: 'Italie', code: 'MXP', emoji: '🇮🇹', img: '🏛️', temp: '23°C', px: 55, py: 52,
+    desc: 'Mode · design · Duomo · gastronomie',
+    train: { time: '3h15', price: 29, op: 'Trenitalia',     stops: 0, co2: 0.3 },
+    bus:   { time: '7h00', price: 15, op: 'FlixBus',        stops: 1, co2: 0.6 },
+    plane: { time: '1h10', price: 48, op: 'Transavia',      stops: 0, co2: 72  },
+    car:   { time: '4h30', price: 46, op: 'Voiture perso',  stops: 0, co2: 49  },
+  },
+  {
+    id: 3, name: 'Paris', country: 'France', code: 'CDG', emoji: '🇫🇷', img: '🗼', temp: '22°C', px: 30, py: 25,
+    desc: 'Louvre · Tour Eiffel · boulangeries',
+    train: { time: '2h00', price: 29, op: 'TGV INOUI',      stops: 0, co2: 0.2 },
+    bus:   { time: '4h30', price: 12, op: 'BlaBlaBus',      stops: 0, co2: 0.4 },
+    plane: null,
+    car:   { time: '4h30', price: 46, op: 'Voiture perso',  stops: 0, co2: 49  },
+  },
+  {
+    id: 4, name: 'Genève', country: 'Suisse', code: 'GVA', emoji: '🇨🇭', img: '⛰️', temp: '19°C', px: 53, py: 43,
+    desc: 'Lac Léman · montres · nature alpine',
+    train: { time: '2h00', price: 24, op: 'SBB / SNCF',    stops: 0, co2: 0.2 },
+    bus:   null,
+    plane: null,
+    car:   { time: '2h30', price: 26, op: 'Voiture perso',  stops: 0, co2: 28  },
+  },
+  {
+    id: 5, name: 'Marseille', country: 'France', code: 'MRS', emoji: '🇫🇷', img: '⛵', temp: '28°C', px: 34, py: 62,
+    desc: 'Calanques · Vieux-Port · bouillabaisse',
+    train: { time: '1h45', price: 19, op: 'TGV INOUI',      stops: 0, co2: 0.2 },
+    bus:   { time: '3h30', price:  9, op: 'BlaBlaBus',      stops: 0, co2: 0.3 },
+    plane: null,
+    car:   { time: '3h00', price: 32, op: 'Voiture perso',  stops: 0, co2: 34  },
+  },
+  {
+    id: 6, name: 'Amsterdam', country: 'Pays-Bas', code: 'AMS', emoji: '🇳🇱', img: '🌷', temp: '18°C', px: 42, py: 18,
+    desc: 'Canaux · Rijksmuseum · vélos',
+    train: { time: '8h00',  price: 89, op: 'Eurostar/Thalys', stops: 2, co2: 0.8  },
+    bus:   { time: '15h',   price: 29, op: 'FlixBus',         stops: 1, co2: 1.4  },
+    plane: { time: '1h40',  price: 65, op: 'Transavia',       stops: 0, co2: 105  },
+    car:   { time: '10h',   price: 98, op: 'Voiture perso',   stops: 0, co2: 104  },
+  },
+  {
+    id: 7, name: 'Nice', country: 'France', code: 'NCE', emoji: '🇫🇷', img: '🌊', temp: '28°C', px: 50, py: 63,
+    desc: "Promenade des Anglais · Côte d'Azur",
+    train: { time: '3h15', price: 24, op: 'TGV INOUI',      stops: 1, co2: 0.3 },
+    bus:   { time: '6h00', price: 18, op: 'FlixBus',        stops: 0, co2: 0.6 },
+    plane: { time: '1h10', price: 52, op: 'Air France',     stops: 0, co2: 70  },
+    car:   { time: '4h00', price: 41, op: 'Voiture perso',  stops: 0, co2: 43  },
+  },
+  {
+    id: 8, name: 'Madrid', country: 'Espagne', code: 'MAD', emoji: '🇪🇸', img: '🎭', temp: '32°C', px: 14, py: 68,
+    desc: 'Prado · Retiro · flamenco · sieste',
+    train: { time: '7h00', price: 59, op: 'SNCF Renfe',     stops: 1, co2: 0.7  },
+    bus:   { time: '14h',  price: 28, op: 'Alsa',           stops: 1, co2: 1.2  },
+    plane: { time: '1h50', price: 62, op: 'Vueling',        stops: 0, co2: 118  },
+    car:   { time: '9h00', price: 86, op: 'Voiture perso',  stops: 0, co2: 91   },
+  },
+  {
+    id: 9, name: 'Rome', country: 'Italie', code: 'FCO', emoji: '🇮🇹', img: '🏟️', temp: '29°C', px: 63, py: 70,
+    desc: 'Colisée · Vatican · pasta · storia',
+    train: { time: '6h30', price: 69, op: 'Trenitalia',     stops: 1, co2: 0.6  },
+    bus:   { time: '14h',  price: 24, op: 'FlixBus',        stops: 2, co2: 1.3  },
+    plane: { time: '1h30', price: 72, op: 'Ryanair',        stops: 0, co2: 94   },
+    car:   { time: '8h00', price: 82, op: 'Voiture perso',  stops: 0, co2: 87   },
+  },
+  {
+    id: 10, name: 'Zurich', country: 'Suisse', code: 'ZRH', emoji: '🇨🇭', img: '🏔️', temp: '20°C', px: 58, py: 35,
+    desc: 'Finance · Vieille-Ville · lacs alpins',
+    train: { time: '3h30', price: 36, op: 'SBB / SNCF',    stops: 0, co2: 0.3 },
+    bus:   null,
+    plane: null,
+    car:   { time: '4h00', price: 40, op: 'Voiture perso',  stops: 0, co2: 43  },
+  },
+]
