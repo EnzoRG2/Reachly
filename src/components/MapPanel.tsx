@@ -47,7 +47,7 @@ function makeOriginIcon(city: CityResult) {
       className: '', iconSize: [12, 12], iconAnchor: [6, 6],
     }),
     label: divIcon({
-      html: `<div style="background:#fff;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;font-family:Inter,system-ui,sans-serif;color:#111827;border:1px solid #E5E7EB;box-shadow:0 2px 10px rgba(0,0,0,0.14);white-space:nowrap;">📍 ${city.name}</div>`,
+      html: `<div style="background:#fff;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;font-family:Inter,system-ui,sans-serif;color:#111827;border:1px solid #E5E7EB;box-shadow:0 2px 10px rgba(0,0,0,0.14);white-space:nowrap;">${city.name}</div>`,
       className: '', iconSize: [0, 0], iconAnchor: [-6, 28],
     }),
   }
