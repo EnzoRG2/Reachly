@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Clock, Leaf, ChevronRight } from 'lucide-react'
 import type { Destination, TransportMode, TransportOption } from '../types'
 import { MODES } from '../data/modes'
 
@@ -13,11 +12,19 @@ interface TransportCardProps {
   onClick: () => void
 }
 
+function co2Meta(kg: number): { label: string; color: string; bg: string } {
+  if (kg < 5)  return { label: 'FAIBLE CO₂',  color: '#16A34A', bg: '#F0FDF4' }
+  if (kg < 50) return { label: 'CO₂ MODÉRÉ',  color: '#D97706', bg: '#FFFBEB' }
+  return        { label: 'CO₂ ÉLEVÉ',   color: '#DC2626', bg: '#FEF2F2' }
+}
+
 export function TransportCard({ mode, data, dest, from, isBest, isLowest, onClick }: TransportCardProps) {
   const [hovered, setHovered] = useState(false)
   const m = MODES[mode]
   const Icon = m.Icon
-  const isGreen = data.co2 < 5
+  const co2 = co2Meta(data.co2)
+  const showBest = isBest
+  const showLowest = isLowest && !isBest
 
   return (
     <div
@@ -25,125 +32,85 @@ export function TransportCard({ mode, data, dest, from, isBest, isLowest, onClic
       onMouseLeave={() => setHovered(false)}
       onClick={onClick}
       style={{
-        display: 'flex',
-        alignItems: 'stretch',
-        background: '#ffffff',
-        border: '1px solid #E5E7EB',
-        borderLeft: `4px solid ${m.color}`,
-        borderRadius: 12,
-        overflow: 'hidden',
-        boxShadow: hovered
-          ? '0 4px 16px rgba(0,0,0,0.10)'
-          : '0 1px 4px rgba(0,0,0,0.06)',
-        transition: 'box-shadow 0.16s, transform 0.16s',
+        background: '#fff',
+        borderRadius: 14,
+        border: `1px solid ${hovered ? '#E0E7FF' : '#F3F4F6'}`,
+        boxShadow: hovered ? '0 4px 20px rgba(0,0,0,0.08)' : '0 1px 3px rgba(0,0,0,0.04)',
+        transition: 'all 0.16s',
         transform: hovered ? 'translateY(-1px)' : 'none',
         cursor: 'pointer',
-        position: 'relative',
+        overflow: 'hidden',
       }}
     >
-      {/* Ribbon ⭐ MEILLEUR */}
-      {isBest && (
-        <div style={{
-          position: 'absolute', top: 0, right: 10,
-          background: m.color, color: '#fff',
-          fontSize: 9, fontWeight: 700,
-          padding: '2px 8px',
-          borderRadius: '0 0 6px 6px',
-          letterSpacing: '0.05em',
-        }}>
-          ⭐ MEILLEUR
-        </div>
-      )}
-      {isLowest && !isBest && (
-        <div style={{
-          position: 'absolute', top: 0, right: 10,
-          background: '#16A34A', color: '#fff',
-          fontSize: 9, fontWeight: 700,
-          padding: '2px 8px',
-          borderRadius: '0 0 6px 6px',
-          letterSpacing: '0.05em',
-        }}>
-          💰 MOINS CHER
-        </div>
-      )}
-
-      {/* Colonne icône — fond teinté pastel 12% */}
+      {/* Header strip — mode label + badge */}
       <div style={{
-        width: 60, flexShrink: 0,
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        gap: 4, padding: '14px 8px',
-        background: `${m.color}1F`, // ~12% opacity hex
-        borderRight: `1px solid ${m.color}30`,
+        padding: '8px 14px 0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
       }}>
-        <Icon size={22} color={m.color} />
         <span style={{
-          fontSize: 9, fontWeight: 700, color: m.color,
-          letterSpacing: '0.05em', textTransform: 'uppercase',
+          fontSize: 10, fontWeight: 800, color: m.color,
+          letterSpacing: '0.08em', textTransform: 'uppercase',
         }}>{m.label}</span>
+        {showBest && (
+          <span style={{
+            fontSize: 9, fontWeight: 700, color: '#fff',
+            background: m.color, padding: '2px 8px',
+            borderRadius: 20, letterSpacing: '0.05em',
+          }}>★ MEILLEUR</span>
+        )}
+        {showLowest && (
+          <span style={{
+            fontSize: 9, fontWeight: 700, color: '#16A34A',
+            background: '#F0FDF4', padding: '2px 8px',
+            border: '1px solid #BBF7D0',
+            borderRadius: 20, letterSpacing: '0.05em',
+          }}>💰 MOINS CHER</span>
+        )}
       </div>
 
-      {/* Centre — opérateur + route */}
-      <div style={{ flex: 1, padding: '12px 14px', minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 7 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#111827', whiteSpace: 'nowrap' }}>{from}</span>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 3 }}>
-            <div style={{ flex: 1, height: 1.5, background: '#E5E7EB', borderRadius: 1 }} />
-            <div style={{ width: 5, height: 5, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
-            <div style={{ flex: 1, height: 1.5, background: '#E5E7EB', borderRadius: 1 }} />
-          </div>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#111827', whiteSpace: 'nowrap' }}>{dest.name}</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 12, color: '#6B7280' }}>{data.op}</span>
-          {data.stops > 0 && (
-            <span style={{
-              fontSize: 10, color: '#9CA3AF',
-              background: '#F3F4F6', padding: '1px 7px',
-              borderRadius: 20, border: '1px solid #E5E7EB',
-            }}>
-              {data.stops} corresp.
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Durée + CO₂ */}
-      <div style={{
-        padding: '12px 10px', textAlign: 'center', flexShrink: 0,
-        borderLeft: '1px solid #F3F4F6',
-        display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 5,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'center' }}>
-          <Clock size={11} color="#9CA3AF" />
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#374151' }}>{data.time}</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'center' }}>
-          <Leaf size={9} color={isGreen ? '#16A34A' : '#F97316'} />
-          <span style={{ fontSize: 10, color: isGreen ? '#16A34A' : '#F97316', fontWeight: 600 }}>
-            {data.co2} kg
-          </span>
-        </div>
-      </div>
-
-      {/* Prix + CTA */}
-      <div style={{
-        padding: '12px 14px', textAlign: 'right', flexShrink: 0,
-        borderLeft: '1px solid #F3F4F6', minWidth: 88,
-        display: 'flex', flexDirection: 'column', justifyContent: 'center',
-      }}>
+      {/* Body */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px 14px' }}>
+        {/* Icon bubble */}
         <div style={{
-          fontSize: 22, fontWeight: 800, color: '#111827',
-          lineHeight: 1, letterSpacing: '-0.5px',
-        }}>{data.price}€</div>
-        <div style={{ fontSize: 10, color: '#9CA3AF', marginBottom: 8 }}>par pers.</div>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 3,
-          padding: '6px 10px', borderRadius: 8, fontSize: 11, fontWeight: 600,
-          background: isBest ? m.color : '#F3F4F6',
-          color: isBest ? '#fff' : '#6B7280',
+          width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+          background: `${m.color}18`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          Voir <ChevronRight size={11} />
+          <Icon size={22} color={m.color} />
+        </div>
+
+        {/* Operator + route */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#111827', marginBottom: 2 }}>
+            {data.op}
+          </div>
+          <div style={{ fontSize: 12, color: '#9CA3AF' }}>
+            {from} → {dest.name}
+            {data.stops > 0 && (
+              <span style={{ marginLeft: 6, color: '#D1D5DB', fontSize: 11 }}>
+                · {data.stops} corresp.
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Price + time + CO₂ */}
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+          <div style={{
+            fontSize: 24, fontWeight: 800, color: '#111827',
+            letterSpacing: '-0.5px', lineHeight: 1,
+          }}>€{data.price}</div>
+          <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>{data.time}</div>
+          <div style={{
+            marginTop: 5,
+            display: 'inline-block',
+            fontSize: 9, fontWeight: 700,
+            color: co2.color, background: co2.bg,
+            padding: '2px 7px', borderRadius: 4,
+            letterSpacing: '0.04em',
+          }}>{co2.label}</div>
         </div>
       </div>
     </div>

@@ -23,6 +23,7 @@ interface ExploreTabProps {
   selected: Destination | null
   onSelectDest: (d: Destination) => void
   scaledDests: Destination[]
+  realTemps?: Record<number, number>
 }
 
 export function ExploreTab({
@@ -33,7 +34,7 @@ export function ExploreTab({
   showFilters, onToggleFilters,
   sortBy, onSortChange,
   selected, onSelectDest,
-  scaledDests,
+  scaledDests, realTemps,
 }: ExploreTabProps) {
   const visible = filterDestinations(scaledDests, activeModes, budget, timeMax)
 
@@ -154,6 +155,7 @@ export function ExploreTab({
                 color={DEST_COLORS[i % DEST_COLORS.length]}
                 activeModes={activeModes}
                 selected={selected?.id === d.id}
+                realTemp={realTemps?.[d.id]}
                 onClick={() => onSelectDest(d)}
               />
             ))}

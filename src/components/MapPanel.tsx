@@ -63,7 +63,7 @@ interface MapPanelProps {
   onSelectDest: (d: Destination) => void
 }
 
-export function MapPanel({ activeModes, visibleDests, selected, timeMax, budget, fromCity, onSelectDest }: MapPanelProps) {
+export function MapPanel({ activeModes, visibleDests, selected, timeMax, fromCity, onSelectDest }: MapPanelProps) {
   const radiusM = timeMax * KM_PER_HOUR * 1000
   const origin: [number, number] = [fromCity.lat, fromCity.lng]
   const icons = makeOriginIcon(fromCity)
@@ -118,7 +118,7 @@ export function MapPanel({ activeModes, visibleDests, selected, timeMax, budget,
         padding: '5px 12px', fontSize: 11, fontWeight: 600, color: '#6B7280',
         boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
       }}>
-        {visibleDests.length} destinations · {timeMax}h · {budget}€
+        ● Zone atteignable en {timeMax}h · {visibleDests.length} destination{visibleDests.length > 1 ? 's' : ''}
       </div>
     </div>
   )
