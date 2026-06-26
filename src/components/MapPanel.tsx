@@ -33,7 +33,7 @@ function makePinIcon(price: number | null, dotColor: string, active: boolean, is
   const scale = isSelected ? 'transform:scale(1.15);' : ''
   return divIcon({
     html: `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;${scale}">
-      <div style="background:#fff;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;font-family:Inter,system-ui,sans-serif;color:#111827;border:1.5px solid ${border};box-shadow:${shadow};white-space:nowrap;">${price}€</div>
+      <div style="background:#fff;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;font-family:Inter,system-ui,sans-serif;color:#111827;border:1.5px solid ${border};box-shadow:${shadow};white-space:nowrap;">€${price}</div>
       <div style="width:5px;height:5px;border-radius:50%;background:${dotColor};box-shadow:0 0 4px ${dotColor}80;"></div>
     </div>`,
     className: '', iconSize: [52, 25], iconAnchor: [26, 25],

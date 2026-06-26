@@ -174,6 +174,16 @@ export default function App() {
         )}
       </header>
 
+      {/* ── DISCLAIMER ───────────────────────────────────────── */}
+      <div style={{
+        background: '#FFFBEB', borderBottom: '1px solid #FDE68A',
+        padding: '5px 20px', display: 'flex', alignItems: 'center', gap: 6,
+        fontSize: 11, color: '#92400E', flexShrink: 0,
+      }}>
+        <span style={{ fontWeight: 700 }}>⚠ Prix estimés</span>
+        <span style={{ color: '#B45309' }}>· Données indicatives basées sur la distance. Vérifiez les tarifs réels avant de réserver.</span>
+      </div>
+
       {/* ── BODY ─────────────────────────────────────────────── */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', flexDirection: isMobile ? 'column' : 'row' }}>
 

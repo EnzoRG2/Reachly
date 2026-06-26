@@ -87,33 +87,39 @@ export function ExploreTab({
           color: showFilters ? '#0063DC' : '#6B7280',
           cursor: 'pointer', fontSize: 11, fontWeight: 700, fontFamily: 'inherit',
         }}>
-          <SlidersHorizontal size={11} /> Filtres
+          <SlidersHorizontal size={11} /> Budget
         </button>
       </div>
 
-      {/* Sliders */}
+      {/* Time slider — always visible */}
+      <div style={{ padding: '10px 16px', background: '#fff', borderBottom: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Clock size={11} color="#16A34A" />
+        <span style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', flexShrink: 0 }}>Durée max</span>
+        <div style={{ flex: 1, position: 'relative', height: 18, display: 'flex', alignItems: 'center' }}>
+          <div style={{ position: 'absolute', left: 0, right: 0, height: 4, background: '#E5E7EB', borderRadius: 3, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${(timeMax / 12) * 100}%`, background: 'linear-gradient(90deg,#16A34A,#22C55E)', borderRadius: 3 }} />
+          </div>
+          <input type="range" min="1" max="12" step="1" value={timeMax}
+            onChange={(e) => onTimeMaxChange(Number(e.target.value))}
+            style={{ position: 'absolute', left: 0, right: 0, width: '100%', opacity: 0, cursor: 'pointer', height: 18, margin: 0, padding: 0 }}
+          />
+        </div>
+        <span style={{
+          fontSize: 12, fontWeight: 800, color: '#fff',
+          background: '#16A34A', borderRadius: 20, padding: '2px 9px', flexShrink: 0,
+        }}>{timeMax}h</span>
+      </div>
+
+      {/* Budget filter */}
       {showFilters && (
-        <div style={{ padding: '12px 16px', background: '#fff', borderBottom: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-              <label style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Clock size={11} color="#0063DC" /> Durée max
-              </label>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#0063DC' }}>{timeMax}h</span>
-            </div>
-            <input type="range" min="1" max="12" step="1" value={timeMax}
-              onChange={(e) => onTimeMaxChange(Number(e.target.value))}
-              style={{ width: '100%', accentColor: '#0063DC' }} />
+        <div style={{ padding: '12px 16px', background: '#fff', borderBottom: '1px solid #E5E7EB' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+            <label style={{ fontSize: 11, fontWeight: 600, color: '#6B7280' }}>Budget max</label>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#0063DC' }}>{budget}€</span>
           </div>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-              <label style={{ fontSize: 11, fontWeight: 600, color: '#6B7280' }}>💰 Budget max</label>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#0063DC' }}>{budget}€</span>
-            </div>
-            <input type="range" min="20" max="300" step="10" value={budget}
-              onChange={(e) => onBudgetChange(Number(e.target.value))}
-              style={{ width: '100%', accentColor: '#0063DC' }} />
-          </div>
+          <input type="range" min="20" max="300" step="10" value={budget}
+            onChange={(e) => onBudgetChange(Number(e.target.value))}
+            style={{ width: '100%', accentColor: '#0063DC' }} />
         </div>
       )}
 
