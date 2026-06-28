@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Map } from 'lucide-react'
+import { Map, Bus } from 'lucide-react'
 import type { Destination, TransportMode, SortKey, CityResult } from './types'
 import { filterDestinations, scaleDestinations } from './utils/transport'
 import { DESTS } from './data/destinations'
@@ -200,15 +200,15 @@ export default function App() {
               onSelectDest={handleSelectDest}
             />
 
-            {/* Floating time slider — Explorer tab only */}
+            {/* Floating time slider — Explorer tab only — anchored to TOP of map */}
             {tab === 'explore' && (
               <div style={{
-                position: 'absolute', bottom: 50, left: '50%', transform: 'translateX(-50%)',
+                position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)',
                 background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(14px)',
                 border: '1px solid #E5E7EB', borderRadius: 16,
-                padding: '12px 20px', boxShadow: '0 6px 24px rgba(0,0,0,0.10)',
+                padding: '12px 20px', boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
                 zIndex: 30, display: 'flex', flexDirection: 'column', gap: 10,
-                minWidth: isMobile ? 250 : 300,
+                width: isMobile ? 260 : 380,
               }}>
                 {/* Label + time pill */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -224,8 +224,8 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Track with gradient fill */}
-                <div style={{ position: 'relative', height: 20, display: 'flex', alignItems: 'center' }}>
+                {/* Track with gradient fill + bus thumb */}
+                <div style={{ position: 'relative', height: 24, display: 'flex', alignItems: 'center' }}>
                   <div style={{
                     position: 'absolute', left: 0, right: 0, height: 5,
                     background: '#E5E7EB', borderRadius: 4, overflow: 'hidden',
@@ -233,26 +233,40 @@ export default function App() {
                     <div style={{
                       height: '100%', width: `${sliderPct}%`,
                       background: 'linear-gradient(90deg,#16A34A,#22C55E)',
-                      borderRadius: 4, transition: 'width 0.15s',
+                      borderRadius: 4, transition: 'width 0.12s',
                     }} />
+                  </div>
+                  {/* Bus icon thumb */}
+                  <div style={{
+                    position: 'absolute',
+                    left: `calc(${sliderPct}% - 10px)`,
+                    top: '50%', transform: 'translateY(-50%)',
+                    width: 20, height: 20,
+                    background: '#fff', borderRadius: '50%',
+                    border: '2px solid #16A34A',
+                    boxShadow: '0 1px 4px rgba(22,163,74,0.30)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    pointerEvents: 'none', zIndex: 1,
+                  }}>
+                    <Bus size={10} color="#16A34A" />
                   </div>
                   <input type="range" min="1" max={SLIDER_MAX} step="1" value={timeMax}
                     onChange={(e) => setTimeMax(Number(e.target.value))}
                     style={{
                       position: 'absolute', left: 0, right: 0, width: '100%',
-                      opacity: 0, cursor: 'pointer', height: 20, margin: 0, padding: 0,
+                      opacity: 0, cursor: 'pointer', height: 24, margin: 0, padding: 0, zIndex: 2,
                     }}
                   />
                 </div>
 
-                {/* Quick marks */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: -6 }}>
-                  {[2, 4, 6, 8, 10, 12].map((h) => (
-                    <button key={h} onClick={() => setTimeMax(h)} style={{
+                {/* Quick marks 0h → 12h */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: -4 }}>
+                  {[0, 2, 4, 6, 8, 10, 12].map((h) => (
+                    <button key={h} onClick={() => h > 0 && setTimeMax(h)} style={{
                       fontSize: 10, fontWeight: timeMax === h ? 700 : 400,
                       color: timeMax === h ? '#16A34A' : '#D1D5DB',
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      padding: '1px 2px', fontFamily: 'inherit',
+                      background: 'none', border: 'none', cursor: h > 0 ? 'pointer' : 'default',
+                      padding: '1px 0', fontFamily: 'inherit',
                     }}>{h}h</button>
                   ))}
                 </div>

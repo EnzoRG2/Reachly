@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // \"\"' | { read -r f; [[ \"$f\" == /Users/enzor/Reachly/* ]] && cd /Users/enzor/Reachly && vercel --prod --yes; } 2>/dev/null || true",
+            "async": true,
+            "statusMessage": "Deploying to Vercel..."
+          }
+        ]
+      }
+    ]
+  }
+}
