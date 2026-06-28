@@ -203,7 +203,8 @@ export default function App() {
             {/* Floating time slider — Explorer tab only — anchored to TOP of map */}
             {tab === 'explore' && (
               <div style={{
-                position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)',
+                position: 'absolute', top: 16, left: 0, right: 0,
+                marginLeft: 'auto', marginRight: 'auto',
                 background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(14px)',
                 border: '1px solid #E5E7EB', borderRadius: 16,
                 padding: '12px 20px', boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
