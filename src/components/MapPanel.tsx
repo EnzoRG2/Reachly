@@ -4,7 +4,6 @@ import { divIcon } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { CityResult, Destination, TransportMode } from '../types'
 import { DESTS } from '../data/destinations'
-import { getBestHours, getTimeZone } from '../utils/isochroneColors'
 import { getMinMode } from '../utils/transport'
 
 const KM_PER_HOUR = 90
@@ -21,20 +20,21 @@ function MapController({ fromCity, selected }: { fromCity: CityResult; selected:
   return null
 }
 
-function makePinIcon(price: number | null, dotColor: string, active: boolean, isSelected: boolean) {
+function makePinIcon(price: number | null, active: boolean, isSelected: boolean) {
   if (!active || price === null) {
     return divIcon({
       html: `<div style="width:8px;height:8px;border-radius:50%;background:#D1C9BE;border:1.5px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.15);"></div>`,
       className: '', iconSize: [8, 8], iconAnchor: [4, 4],
     })
   }
-  const border = isSelected ? '#0063DC' : '#E5E7EB'
-  const shadow = isSelected ? '0 2px 10px rgba(0,99,220,0.35)' : '0 1px 5px rgba(0,0,0,0.15)'
+  const dotColor = isSelected ? '#2563EB' : '#F97316'
+  const border = isSelected ? '#2563EB' : '#E5E7EB'
+  const shadow = isSelected ? '0 2px 10px rgba(37,99,235,0.35)' : '0 1px 5px rgba(0,0,0,0.15)'
   const scale = isSelected ? 'transform:scale(1.15);' : ''
   return divIcon({
     html: `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;${scale}">
       <div style="background:#fff;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;font-family:Inter,system-ui,sans-serif;color:#111827;border:1.5px solid ${border};box-shadow:${shadow};white-space:nowrap;">€${price}</div>
-      <div style="width:5px;height:5px;border-radius:50%;background:${dotColor};box-shadow:0 0 4px ${dotColor}80;"></div>
+      <div style="width:6px;height:6px;border-radius:50%;background:${dotColor};box-shadow:0 0 5px ${dotColor}90;"></div>
     </div>`,
     className: '', iconSize: [52, 25], iconAnchor: [26, 25],
   })
@@ -43,11 +43,11 @@ function makePinIcon(price: number | null, dotColor: string, active: boolean, is
 function makeOriginIcon(city: CityResult) {
   return {
     dot: divIcon({
-      html: `<div style="width:12px;height:12px;border-radius:50%;background:#0063DC;border:2px solid #fff;box-shadow:0 0 0 3px rgba(0,99,220,0.25);"></div>`,
+      html: `<div style="width:12px;height:12px;border-radius:50%;background:#2563EB;border:2.5px solid #fff;box-shadow:0 0 0 3px rgba(37,99,235,0.25);"></div>`,
       className: '', iconSize: [12, 12], iconAnchor: [6, 6],
     }),
     label: divIcon({
-      html: `<div style="background:#fff;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;font-family:Inter,system-ui,sans-serif;color:#111827;border:1px solid #E5E7EB;box-shadow:0 2px 10px rgba(0,0,0,0.14);white-space:nowrap;">${city.name}</div>`,
+      html: `<div style="background:#2563EB;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;font-family:Inter,system-ui,sans-serif;color:#fff;box-shadow:0 2px 12px rgba(37,99,235,0.35);white-space:nowrap;">${city.name}</div>`,
       className: '', iconSize: [0, 0], iconAnchor: [-6, 28],
     }),
   }
@@ -81,10 +81,10 @@ export function MapPanel({ activeModes, visibleDests, selected, timeMax, fromCit
         <MapController fromCity={fromCity} selected={selected} />
 
         {/* Isochrone */}
-        <Circle center={origin} radius={radiusM * 1.08}
-          pathOptions={{ fillColor: '#22C55E', fillOpacity: 0.04, color: 'transparent', weight: 0 }} />
+        <Circle center={origin} radius={radiusM * 1.10}
+          pathOptions={{ fillColor: '#3B82F6', fillOpacity: 0.04, color: 'transparent', weight: 0 }} />
         <Circle center={origin} radius={radiusM}
-          pathOptions={{ fillColor: '#22C55E', fillOpacity: 0.13, color: '#16A34A', weight: 1.5, opacity: 0.3 }} />
+          pathOptions={{ fillColor: '#3B82F6', fillOpacity: 0.09, color: '#2563EB', weight: 1, opacity: 0.18 }} />
 
         {/* Departure city */}
         <Marker position={origin} icon={icons.dot} interactive={false} />
@@ -96,11 +96,8 @@ export function MapPanel({ activeModes, visibleDests, selected, timeMax, fromCit
           const scaled = visibleDests.find((v) => v.id === d.id) ?? d
           const bestMode = getMinMode(scaled, activeModes)
           const bestData = bestMode ? scaled[bestMode] : null
-          const bestH = getBestHours(d, activeModes)
-          const zone = getTimeZone(bestH)
           const isSelected = selected?.id === d.id
-          const dotColor = isSelected ? '#0063DC' : zone.pinColor
-          const icon = makePinIcon(bestData?.price ?? null, dotColor, isActive, isSelected)
+          const icon = makePinIcon(bestData?.price ?? null, isActive, isSelected)
 
           return (
             <Marker key={d.id} position={[d.lat, d.lng]} icon={icon}
@@ -117,8 +114,11 @@ export function MapPanel({ activeModes, visibleDests, selected, timeMax, fromCit
         border: '1px solid #E5E7EB', borderRadius: 10,
         padding: '5px 12px', fontSize: 11, fontWeight: 600, color: '#6B7280',
         boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+        display: 'flex', alignItems: 'center', gap: 5,
       }}>
-        ● Zone atteignable en {timeMax}h · {visibleDests.length} destination{visibleDests.length > 1 ? 's' : ''}
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#2563EB', display: 'inline-block', flexShrink: 0 }} />
+        <span style={{ fontWeight: 800, color: '#2563EB' }}>{visibleDests.length}</span>
+        <span>destination{visibleDests.length > 1 ? 's' : ''} en {timeMax}h</span>
       </div>
     </div>
   )

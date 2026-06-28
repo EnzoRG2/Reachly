@@ -1,18 +1,15 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Map, Bus } from 'lucide-react'
+import { Bus, X, User } from 'lucide-react'
 import type { Destination, TransportMode, SortKey, CityResult } from './types'
 import { filterDestinations, scaleDestinations } from './utils/transport'
 import { DESTS } from './data/destinations'
+import { MODES } from './data/modes'
 import { useWeatherBatch } from './hooks/useWeather'
-import { ExploreTab } from './components/ExploreTab'
 import { CompareTab } from './components/CompareTab'
 import { MapPanel } from './components/MapPanel'
 
-type Tab = 'explore' | 'compare'
-
 const LYON: CityResult = { name: 'Lyon', displayName: 'Lyon, France', lat: 45.764, lng: 4.8357 }
-
 const SLIDER_MAX = 12
 
 function formatTimeLabel(h: number) {
@@ -35,18 +32,14 @@ export default function App() {
   const [searchParams, setSearchParams] = useSearchParams()
   const isMobile = useIsMobile()
 
-  const [tab, setTab] = useState<Tab>(() => searchParams.get('to') ? 'compare' : 'explore')
   const [fromCity, setFromCity] = useState<CityResult>(LYON)
   const [fromInput, setFromInput] = useState('Lyon')
   const [toInput, setToInput] = useState(() => searchParams.get('to') ?? '')
   const [selected, setSelected] = useState<Destination | null>(null)
   const [activeModes, setActiveModes] = useState<TransportMode[]>(['train', 'bus', 'plane', 'car'])
   const [timeMax, setTimeMax] = useState(6)
-  const [budget, setBudget] = useState(150)
-  const [showFilters, setShowFilters] = useState(false)
   const [sortBy, setSortBy] = useState<SortKey>('price')
   const [toast, setToast] = useState<string | null>(null)
-  const [showMap, setShowMap] = useState(false)
 
   const realTemps = useWeatherBatch(DESTS)
 
@@ -61,8 +54,8 @@ export default function App() {
   )
 
   const visibleDests = useMemo(
-    () => filterDestinations(scaledDests, activeModes, budget, timeMax),
-    [scaledDests, activeModes, budget, timeMax],
+    () => filterDestinations(scaledDests, activeModes, 500, timeMax),
+    [scaledDests, activeModes, timeMax],
   )
 
   const toggleMode = useCallback((m: TransportMode) => {
@@ -82,8 +75,6 @@ export default function App() {
   const handleSelectDest = useCallback((d: Destination) => {
     setSelected(d)
     setToInput(d.name)
-    setTab('compare')
-    setShowMap(false)
     setSearchParams((p) => { p.set('from', fromCity.name); p.set('to', d.name); return p }, { replace: true })
   }, [fromCity.name, setSearchParams])
 
@@ -94,11 +85,9 @@ export default function App() {
     setFromCity(LYON)
   }, [fromInput, toInput])
 
-  const setTabWithUrl = useCallback((t: Tab) => {
-    setTab(t)
-    if (t === 'explore') {
-      setSearchParams((p) => { p.delete('to'); return p }, { replace: true })
-    }
+  const handleClosePanel = useCallback(() => {
+    setSelected(null)
+    setSearchParams((p) => { p.delete('to'); return p }, { replace: true })
   }, [setSearchParams])
 
   const sliderPct = (timeMax / SLIDER_MAX) * 100
@@ -109,216 +98,218 @@ export default function App() {
       fontSize: 14, WebkitFontSmoothing: 'antialiased',
       display: 'flex', flexDirection: 'column',
       height: '100vh', overflow: 'hidden',
-      background: '#F9FAFB',
+      background: '#F1F5F9',
     }}>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
       {/* ── HEADER ─────────────────────────────────────────── */}
       <header style={{
-        background: '#fff',
-        borderBottom: '1px solid #F3F4F6',
-        padding: '0 20px', display: 'flex', alignItems: 'center', gap: 12,
-        height: 54, flexShrink: 0, zIndex: 40,
+        background: '#2563EB',
+        padding: '0 20px', display: 'flex', alignItems: 'center', gap: 16,
+        height: 56, flexShrink: 0, zIndex: 40,
       }}>
-        {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0 }}>
           <div style={{
             width: 30, height: 30, borderRadius: 9,
-            background: 'linear-gradient(135deg,#16A34A,#22C55E)',
+            background: 'rgba(255,255,255,0.20)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontWeight: 900, fontSize: 15, color: '#fff', letterSpacing: '-0.5px',
-            boxShadow: '0 2px 8px rgba(22,163,74,0.35)',
           }}>R</div>
-          <span style={{ fontWeight: 800, fontSize: 16, color: '#111827', letterSpacing: '-0.5px' }}>Reachly</span>
-          <span style={{ fontSize: 9, fontWeight: 700, color: '#16A34A', background: '#F0FDF4', padding: '2px 7px', borderRadius: 20, border: '1px solid #BBF7D0' }}>BETA</span>
+          <span style={{ fontWeight: 800, fontSize: 16, color: '#fff', letterSpacing: '-0.5px' }}>Reachly</span>
         </div>
 
-        {/* Nav tabs */}
-        <nav style={{ display: 'flex', gap: 3, marginLeft: 12 }}>
-          {([['explore', '🗺️ Explorer'], ['compare', '⚡ Comparer']] as [Tab, string][]).map(([id, label]) => (
-            <button key={id} onClick={() => setTabWithUrl(id)} style={{
-              padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
-              fontFamily: 'inherit', fontSize: 12,
-              fontWeight: tab === id ? 700 : 500,
-              background: tab === id ? '#F0FDF4' : 'transparent',
-              color: tab === id ? '#16A34A' : '#6B7280',
-              transition: 'all 0.14s',
-            }}>{label}</button>
+        <nav style={{ display: 'flex', gap: 2, marginLeft: 8 }}>
+          {[
+            { id: 'explorer', label: 'Explorer', active: !selected },
+            { id: 'trajets', label: 'Trajets', active: false },
+            { id: 'inspiration', label: 'Inspiration', active: false },
+            { id: 'favoris', label: 'Favoris', active: false },
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={item.id === 'explorer' ? handleClosePanel : undefined}
+              style={{
+                padding: '6px 16px', borderRadius: 20, border: 'none', cursor: 'pointer',
+                fontFamily: 'inherit', fontSize: 13,
+                fontWeight: item.active ? 700 : 500,
+                background: item.active ? '#fff' : 'transparent',
+                color: item.active ? '#2563EB' : 'rgba(255,255,255,0.75)',
+                transition: 'all 0.14s',
+              }}
+            >{item.label}</button>
           ))}
         </nav>
 
         <div style={{ flex: 1 }} />
 
-        {/* Mobile map toggle */}
-        {isMobile ? (
-          <button onClick={() => setShowMap((v) => !v)} style={{
-            padding: '6px 12px', borderRadius: 8, border: '1.5px solid #E5E7EB',
-            background: showMap ? '#F0FDF4' : '#fff',
-            color: showMap ? '#16A34A' : '#6B7280', fontFamily: 'inherit',
-            fontSize: 12, fontWeight: 600, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: 5,
-          }}>
-            <Map size={13} /> Carte
-          </button>
-        ) : (
-          /* DÉPART pill */
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
-            display: 'flex', alignItems: 'center', gap: 5,
-            background: '#F9FAFB', border: '1.5px solid #E5E7EB',
-            borderRadius: 20, padding: '5px 12px',
-            fontSize: 11, fontWeight: 700, color: '#374151',
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)',
+            borderRadius: 20, padding: '5px 14px',
+            fontSize: 12, fontWeight: 700, color: '#fff',
           }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16A34A', display: 'inline-block' }} />
-            DÉPART {fromCity.name.toUpperCase()}
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', display: 'inline-block', opacity: 0.85 }} />
+            DÉPART · {fromCity.name}
           </div>
-        )}
+          <div style={{
+            width: 32, height: 32, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.18)', border: '1.5px solid rgba(255,255,255,0.35)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+          }}>
+            <User size={15} color="#fff" />
+          </div>
+        </div>
       </header>
 
-      {/* ── DISCLAIMER ───────────────────────────────────────── */}
-      <div style={{
-        background: '#FFFBEB', borderBottom: '1px solid #FDE68A',
-        padding: '5px 20px', display: 'flex', alignItems: 'center', gap: 6,
-        fontSize: 11, color: '#92400E', flexShrink: 0,
-      }}>
-        <span style={{ fontWeight: 700 }}>⚠ Prix estimés</span>
-        <span style={{ color: '#B45309' }}>· Données indicatives basées sur la distance. Vérifiez les tarifs réels avant de réserver.</span>
-      </div>
-
       {/* ── BODY ─────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', flexDirection: isMobile ? 'column' : 'row' }}>
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
-        {/* Map — LEFT on desktop, toggleable on mobile */}
-        {(!isMobile || showMap) && (
-          <div style={{ flex: 1, position: 'relative', minHeight: isMobile ? 0 : undefined }}>
-            <MapPanel
-              activeModes={activeModes}
-              visibleDests={visibleDests}
-              selected={selected}
-              timeMax={timeMax}
-              budget={budget}
-              fromCity={fromCity}
-              onSelectDest={handleSelectDest}
-            />
+        {/* Map — always full width within its flex area */}
+        <div style={{ flex: 1, position: 'relative', minWidth: 0 }}>
+          <MapPanel
+            activeModes={activeModes}
+            visibleDests={visibleDests}
+            selected={selected}
+            timeMax={timeMax}
+            budget={500}
+            fromCity={fromCity}
+            onSelectDest={handleSelectDest}
+          />
 
-            {/* Floating time slider — Explorer tab only — anchored to TOP of map */}
-            {tab === 'explore' && (
-              <div style={{
-                position: 'absolute', top: 16, left: 0, right: 0,
-                marginLeft: 'auto', marginRight: 'auto',
-                background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(14px)',
-                border: '1px solid #E5E7EB', borderRadius: 16,
-                padding: '12px 20px', boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
-                zIndex: 30, display: 'flex', flexDirection: 'column', gap: 10,
-                width: isMobile ? 260 : 380,
-              }}>
-                {/* Label + time pill */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 9, fontWeight: 800, color: '#9CA3AF', letterSpacing: '0.10em', textTransform: 'uppercase' }}>
-                    Temps de trajet maximum
-                  </span>
-                  <div style={{
-                    background: '#16A34A', color: '#fff',
-                    borderRadius: 20, padding: '3px 10px',
-                    fontSize: 12, fontWeight: 800, letterSpacing: '-0.3px',
-                  }}>
-                    {formatTimeLabel(timeMax)}
-                  </div>
-                </div>
-
-                {/* Track with gradient fill + bus thumb */}
-                <div style={{ position: 'relative', height: 24, display: 'flex', alignItems: 'center' }}>
-                  <div style={{
-                    position: 'absolute', left: 0, right: 0, height: 5,
-                    background: '#E5E7EB', borderRadius: 4, overflow: 'hidden',
-                  }}>
-                    <div style={{
-                      height: '100%', width: `${sliderPct}%`,
-                      background: 'linear-gradient(90deg,#16A34A,#22C55E)',
-                      borderRadius: 4, transition: 'width 0.12s',
-                    }} />
-                  </div>
-                  {/* Bus icon thumb */}
-                  <div style={{
-                    position: 'absolute',
-                    left: `calc(${sliderPct}% - 10px)`,
-                    top: '50%', transform: 'translateY(-50%)',
-                    width: 20, height: 20,
-                    background: '#fff', borderRadius: '50%',
-                    border: '2px solid #16A34A',
-                    boxShadow: '0 1px 4px rgba(22,163,74,0.30)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    pointerEvents: 'none', zIndex: 1,
-                  }}>
-                    <Bus size={10} color="#16A34A" />
-                  </div>
-                  <input type="range" min="1" max={SLIDER_MAX} step="1" value={timeMax}
-                    onChange={(e) => setTimeMax(Number(e.target.value))}
-                    style={{
-                      position: 'absolute', left: 0, right: 0, width: '100%',
-                      opacity: 0, cursor: 'pointer', height: 24, margin: 0, padding: 0, zIndex: 2,
-                    }}
-                  />
-                </div>
-
-                {/* Quick marks 0h → 12h */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: -4 }}>
-                  {[0, 2, 4, 6, 8, 10, 12].map((h) => (
-                    <button key={h} onClick={() => h > 0 && setTimeMax(h)} style={{
-                      fontSize: 10, fontWeight: timeMax === h ? 700 : 400,
-                      color: timeMax === h ? '#16A34A' : '#D1D5DB',
-                      background: 'none', border: 'none', cursor: h > 0 ? 'pointer' : 'default',
-                      padding: '1px 0', fontFamily: 'inherit',
-                    }}>{h}h</button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Panel — RIGHT on desktop */}
-        {(!isMobile || !showMap) && (
+          {/* Floating time slider */}
           <div style={{
-            width: isMobile ? '100%' : 400,
+            position: 'absolute', top: 16, left: 0, right: 0,
+            marginLeft: 'auto', marginRight: 'auto',
+            background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(14px)',
+            border: '1px solid #E5E7EB', borderRadius: 16,
+            padding: '12px 20px', boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
+            zIndex: 30, display: 'flex', flexDirection: 'column', gap: 10,
+            width: isMobile ? 260 : 380,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 9, fontWeight: 800, color: '#9CA3AF', letterSpacing: '0.10em', textTransform: 'uppercase' }}>
+                Temps de trajet maximum
+              </span>
+              <div style={{
+                background: '#2563EB', color: '#fff',
+                borderRadius: 20, padding: '3px 10px',
+                fontSize: 12, fontWeight: 800, letterSpacing: '-0.3px',
+              }}>
+                {formatTimeLabel(timeMax)}
+              </div>
+            </div>
+
+            <div style={{ position: 'relative', height: 24, display: 'flex', alignItems: 'center' }}>
+              <div style={{
+                position: 'absolute', left: 0, right: 0, height: 5,
+                background: '#E5E7EB', borderRadius: 4, overflow: 'hidden',
+              }}>
+                <div style={{
+                  height: '100%', width: `${sliderPct}%`,
+                  background: 'linear-gradient(90deg,#2563EB,#60A5FA)',
+                  borderRadius: 4, transition: 'width 0.12s',
+                }} />
+              </div>
+              <div style={{
+                position: 'absolute',
+                left: `calc(${sliderPct}% - 10px)`,
+                top: '50%', transform: 'translateY(-50%)',
+                width: 20, height: 20,
+                background: '#fff', borderRadius: '50%',
+                border: '2px solid #F97316',
+                boxShadow: '0 1px 4px rgba(249,115,22,0.30)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                pointerEvents: 'none', zIndex: 1,
+              }}>
+                <Bus size={10} color="#F97316" />
+              </div>
+              <input type="range" min="1" max={SLIDER_MAX} step="1" value={timeMax}
+                onChange={(e) => setTimeMax(Number(e.target.value))}
+                style={{
+                  position: 'absolute', left: 0, right: 0, width: '100%',
+                  opacity: 0, cursor: 'pointer', height: 24, margin: 0, padding: 0, zIndex: 2,
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: -4 }}>
+              {[0, 2, 4, 6, 8, 10, 12].map((h) => (
+                <button key={h} onClick={() => h > 0 && setTimeMax(h)} style={{
+                  fontSize: 10, fontWeight: timeMax === h ? 700 : 400,
+                  color: timeMax === h ? '#2563EB' : '#D1D5DB',
+                  background: 'none', border: 'none', cursor: h > 0 ? 'pointer' : 'default',
+                  padding: '1px 0', fontFamily: 'inherit',
+                }}>{h}h</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Mode filter pills */}
+          <div style={{
+            position: 'absolute', top: 130, left: 0, right: 0,
+            display: 'flex', justifyContent: 'center', gap: 6,
+            zIndex: 30, pointerEvents: 'none',
+          }}>
+            {(Object.entries(MODES) as [TransportMode, typeof MODES[TransportMode]][]).map(([k, v]) => {
+              const Icon = v.Icon
+              const active = activeModes.includes(k)
+              return (
+                <button key={k} onClick={() => toggleMode(k)} style={{
+                  pointerEvents: 'auto',
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  padding: '5px 12px', borderRadius: 20,
+                  border: `1.5px solid ${active ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.35)'}`,
+                  background: active ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.55)',
+                  backdropFilter: 'blur(8px)',
+                  color: active ? v.color : '#6B7280',
+                  cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                  fontFamily: 'inherit', transition: 'all 0.14s',
+                  boxShadow: active ? '0 2px 8px rgba(0,0,0,0.10)' : 'none',
+                }}>
+                  <Icon size={11} />{v.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Right panel — appears only when a destination is selected */}
+        {selected && (
+          <div style={{
+            width: isMobile ? '100%' : 420,
             flexShrink: 0,
             background: '#fff',
-            borderLeft: isMobile ? 'none' : '1px solid #F3F4F6',
+            borderLeft: '1px solid #E5E7EB',
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden',
-            flex: isMobile ? '1' : undefined,
+            position: isMobile ? 'absolute' : 'relative',
+            ...(isMobile ? { right: 0, top: 0, bottom: 0, zIndex: 50 } : {}),
+            boxShadow: '-4px 0 24px rgba(0,0,0,0.07)',
           }}>
-            {tab === 'explore' && (
-              <ExploreTab
-                fromInput={fromInput} onFromInputChange={setFromInput}
-                onFromSelect={handleFromSelect}
-                activeModes={activeModes} onToggleMode={toggleMode}
-                timeMax={timeMax} onTimeMaxChange={setTimeMax}
-                budget={budget} onBudgetChange={setBudget}
-                showFilters={showFilters} onToggleFilters={() => setShowFilters((v) => !v)}
-                sortBy={sortBy} onSortChange={setSortBy}
-                selected={selected} onSelectDest={handleSelectDest}
-                scaledDests={scaledDests}
-                realTemps={realTemps}
-              />
-            )}
-            {tab === 'compare' && (
-              <CompareTab
-                fromInput={fromInput} onFromInputChange={setFromInput} onFromSelect={handleFromSelect}
-                toInput={toInput} onToInputChange={setToInput}
-                selected={selected} onSelectDest={setSelected}
-                scaledDests={scaledDests}
-                activeModes={activeModes}
-                sortBy={sortBy} onSortChange={setSortBy}
-                onToast={showToast} onSwap={handleSwap}
-                fromCity={fromCity}
-                realTemp={selected ? realTemps[selected.id] : undefined}
-              />
-            )}
+            <button onClick={handleClosePanel} style={{
+              position: 'absolute', top: 12, right: 12, zIndex: 10,
+              width: 28, height: 28, borderRadius: '50%',
+              background: '#F3F4F6', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <X size={14} color="#6B7280" />
+            </button>
+            <CompareTab
+              fromInput={fromInput} onFromInputChange={setFromInput} onFromSelect={handleFromSelect}
+              toInput={toInput} onToInputChange={setToInput}
+              selected={selected} onSelectDest={setSelected}
+              scaledDests={scaledDests}
+              activeModes={activeModes}
+              sortBy={sortBy} onSortChange={setSortBy}
+              onToast={showToast} onSwap={handleSwap}
+              fromCity={fromCity}
+              realTemp={realTemps[selected.id]}
+            />
           </div>
         )}
       </div>
 
-      {/* Toast */}
       {toast && (
         <div style={{
           position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
