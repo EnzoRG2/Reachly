@@ -166,7 +166,7 @@ export default function App() {
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
         {/* Map — always full width within its flex area */}
-        <div style={{ flex: 1, position: 'relative', minWidth: 0 }}>
+        <div style={{ flex: 1, position: 'relative', minWidth: 0, isolation: 'isolate' }}>
           <MapPanel
             activeModes={activeModes}
             visibleDests={visibleDests}
@@ -184,7 +184,7 @@ export default function App() {
             background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(14px)',
             border: '1px solid #E5E7EB', borderRadius: 16,
             padding: '12px 20px', boxShadow: '0 4px 20px rgba(0,0,0,0.09)',
-            zIndex: 30, display: 'flex', flexDirection: 'column', gap: 10,
+            zIndex: 1100, display: 'flex', flexDirection: 'column', gap: 10,
             width: isMobile ? 260 : 380,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -249,7 +249,7 @@ export default function App() {
           <div style={{
             position: 'absolute', top: 130, left: 0, right: 0,
             display: 'flex', justifyContent: 'center', gap: 6,
-            zIndex: 30, pointerEvents: 'none',
+            zIndex: 1100, pointerEvents: 'none',
           }}>
             {(Object.entries(MODES) as [TransportMode, typeof MODES[TransportMode]][]).map(([k, v]) => {
               const Icon = v.Icon
