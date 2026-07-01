@@ -4,10 +4,10 @@ import { Bus, X, User } from 'lucide-react'
 import type { Destination, TransportMode, SortKey, CityResult } from './types'
 import { filterDestinations, scaleDestinations } from './utils/transport'
 import { DESTS } from './data/destinations'
-import { MODES } from './data/modes'
 import { useWeatherBatch } from './hooks/useWeather'
 import { CompareTab } from './components/CompareTab'
 import { MapPanel } from './components/MapPanel'
+import { LeftSidebar, type NavTab } from './components/LeftSidebar'
 
 const LYON: CityResult = { name: 'Lyon', displayName: 'Lyon, France', lat: 45.764, lng: 4.8357 }
 const SLIDER_MAX = 12
@@ -40,6 +40,7 @@ export default function App() {
   const [timeMax, setTimeMax] = useState(6)
   const [sortBy, setSortBy] = useState<SortKey>('price')
   const [toast, setToast] = useState<string | null>(null)
+  const [activeNav, setActiveNav] = useState<NavTab>('explorer')
 
   const realTemps = useWeatherBatch(DESTS)
 
@@ -119,25 +120,20 @@ export default function App() {
         </div>
 
         <nav style={{ display: 'flex', gap: 2, marginLeft: 8 }}>
-          {[
-            { id: 'explorer', label: 'Explorer', active: !selected },
-            { id: 'trajets', label: 'Trajets', active: false },
-            { id: 'inspiration', label: 'Inspiration', active: false },
-            { id: 'favoris', label: 'Favoris', active: false },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={item.id === 'explorer' ? handleClosePanel : undefined}
-              style={{
+          {(['explorer', 'trajets', 'inspiration', 'favoris'] as NavTab[]).map((id) => {
+            const labels: Record<NavTab, string> = { explorer: 'Explorer', trajets: 'Trajets', inspiration: 'Inspiration', favoris: 'Favoris' }
+            const active = activeNav === id
+            return (
+              <button key={id} onClick={() => setActiveNav(id)} style={{
                 padding: '6px 16px', borderRadius: 20, border: 'none', cursor: 'pointer',
                 fontFamily: 'inherit', fontSize: 13,
-                fontWeight: item.active ? 700 : 500,
-                background: item.active ? '#fff' : 'transparent',
-                color: item.active ? '#2563EB' : 'rgba(255,255,255,0.75)',
+                fontWeight: active ? 700 : 500,
+                background: active ? '#fff' : 'transparent',
+                color: active ? '#2563EB' : 'rgba(255,255,255,0.75)',
                 transition: 'all 0.14s',
-              }}
-            >{item.label}</button>
-          ))}
+              }}>{labels[id]}</button>
+            )
+          })}
         </nav>
 
         <div style={{ flex: 1 }} />
@@ -165,7 +161,20 @@ export default function App() {
       {/* ── BODY ─────────────────────────────────────────────── */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
-        {/* Map — always full width within its flex area */}
+        {!isMobile && (
+          <LeftSidebar
+            activeNav={activeNav}
+            fromInput={fromInput} onFromInputChange={setFromInput} onFromSelect={handleFromSelect}
+            activeModes={activeModes} onToggleMode={toggleMode}
+            timeMax={timeMax}
+            sortBy={sortBy} onSortChange={setSortBy}
+            visibleDests={visibleDests}
+            selected={selected} onSelectDest={handleSelectDest}
+            realTemps={realTemps}
+          />
+        )}
+
+        {/* Map */}
         <div style={{ flex: 1, position: 'relative', minWidth: 0, isolation: 'isolate' }}>
           <MapPanel
             activeModes={activeModes}
@@ -245,33 +254,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Mode filter pills */}
-          <div style={{
-            position: 'absolute', top: 130, left: 0, right: 0,
-            display: 'flex', justifyContent: 'center', gap: 6,
-            zIndex: 1100, pointerEvents: 'none',
-          }}>
-            {(Object.entries(MODES) as [TransportMode, typeof MODES[TransportMode]][]).map(([k, v]) => {
-              const Icon = v.Icon
-              const active = activeModes.includes(k)
-              return (
-                <button key={k} onClick={() => toggleMode(k)} style={{
-                  pointerEvents: 'auto',
-                  display: 'flex', alignItems: 'center', gap: 4,
-                  padding: '5px 12px', borderRadius: 20,
-                  border: `1.5px solid ${active ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.35)'}`,
-                  background: active ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.55)',
-                  backdropFilter: 'blur(8px)',
-                  color: active ? v.color : '#6B7280',
-                  cursor: 'pointer', fontSize: 11, fontWeight: 700,
-                  fontFamily: 'inherit', transition: 'all 0.14s',
-                  boxShadow: active ? '0 2px 8px rgba(0,0,0,0.10)' : 'none',
-                }}>
-                  <Icon size={11} />{v.label}
-                </button>
-              )
-            })}
-          </div>
         </div>
 
         {/* Right panel — appears only when a destination is selected */}
